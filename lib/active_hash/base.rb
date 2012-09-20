@@ -446,7 +446,7 @@ module ActiveHash
     def save(*args)
       index = self.class.all.index(self)
 
-      self.class.all.delete_at(index) if index.preset?
+      self.class.all.delete_at(index) if index.present?
 
       self.class.insert(self)
       true
