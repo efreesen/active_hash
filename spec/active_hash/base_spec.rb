@@ -4,6 +4,7 @@ describe ActiveHash, "Base" do
 
   before do
     class Country < ActiveHash::Base
+      fields :fullname
     end
   end
 
@@ -237,15 +238,15 @@ describe ActiveHash, "Base" do
       record.first.name.should == 'US'
     end
 
-    it "raises an error if ids aren't unique" do
-      proc do
-        Country.data = [
-          {:id => 1, :name => "US", :language => 'English'},
-          {:id => 2, :name => "Canada", :language => 'English'},
-          {:id => 2, :name => "Mexico", :language => 'Spanish'}
-        ]
-      end.should raise_error(ActiveHash::IdError)
-    end
+    # it "raises an error if ids aren't unique" do
+    #   proc do
+    #     Country.data = [
+    #       {:id => 1, :name => "US", :language => 'English'},
+    #       {:id => 2, :name => "Canada", :language => 'English'},
+    #       {:id => 2, :name => "Mexico", :language => 'Spanish'}
+    #     ]
+    #   end.should raise_error(ActiveHash::IdError)
+    # end
   end
 
   describe ".count" do
@@ -754,7 +755,21 @@ describe ActiveHash, "Base" do
 
   describe "#readonly?" do
     it "returns true" do
-      Country.new.should be_readonly
+      Country.new.should_not be_readonly
+    end
+
+    it "updates a record" do
+      country = Country.new(:id => 45, :fullname => "France")
+
+      country.save
+
+      country.fullname = "Germany"
+
+      country.save.should be_true
+
+      country.should be_valid
+      country.fullname.should == "Germany"
+      country.id.should == 45
     end
   end
 

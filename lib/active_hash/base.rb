@@ -68,8 +68,11 @@ module ActiveHash
       end
 
       def insert(record)
+        record_index.delete(record.id.to_s) if record_index[record.id.to_s].present?
+
         @records ||= []
         record.attributes[:id] ||= next_id
+
         validate_unique_id(record) if dirty
         mark_dirty
 
@@ -405,7 +408,7 @@ module ActiveHash
     end
 
     def readonly?
-      true
+      false
     end
 
     def eql?(other)
@@ -444,10 +447,6 @@ module ActiveHash
     end
 
     def save(*args)
-      index = self.class.all.index(self)
-
-      self.class.all.delete_at(index) if index.present?
-
       self.class.insert(self)
       true
     end
