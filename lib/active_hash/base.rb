@@ -68,6 +68,11 @@ module ActiveHash
       end
 
       def insert(record)
+        if self.all.map(&:to_s).include?(record.to_s)
+          record_index.delete(record.id.to_s)
+          self.all.delete(record)
+        end
+
         if record_index[record.id.to_s].nil? || !self.all.map(&:to_s).include?(record.to_s)
           @records ||= []
           record.attributes[:id] ||= next_id
