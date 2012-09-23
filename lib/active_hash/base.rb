@@ -80,8 +80,10 @@ module ActiveHash
           validate_unique_id(record) if dirty
           mark_dirty
 
-          add_to_record_index({ record.id.to_s => @records.length })
-          @records << record
+          if record.valid?
+            add_to_record_index({ record.id.to_s => @records.length })
+            @records << record
+          end
         end
       end
 
