@@ -68,16 +68,16 @@ module ActiveHash
       end
 
       def insert(record)
-        record_index.delete(record.id.to_s) if record_index[record.id.to_s].present?
+        if record_index[record.id.to_s].nil? || !self.all.map(&:to_s).include?(record.to_s)
+          @records ||= []
+          record.attributes[:id] ||= next_id
 
-        @records ||= []
-        record.attributes[:id] ||= next_id
+          validate_unique_id(record) if dirty
+          mark_dirty
 
-        validate_unique_id(record) if dirty
-        mark_dirty
-
-        add_to_record_index({ record.id.to_s => @records.length })
-        @records << record
+          add_to_record_index({ record.id.to_s => @records.length })
+          @records << record
+        end
       end
 
       def next_id
@@ -447,8 +447,20 @@ module ActiveHash
     end
 
     def save(*args)
-      self.class.insert(self)
+      record = self.class.find(self.id) if self.class.exists?(self.id)
+
+      self.class.insert(self) unless record == self
       true
+    end
+
+    def self.exists?(id)
+      begin
+        find(id)
+        true
+      rescue RecordNotFound
+        false
+      end
+
     end
 
     alias save! save
